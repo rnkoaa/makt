@@ -71,6 +71,16 @@ public class MarketPlaceAd extends Aggregate {
     }
 
     @CommandHandler
+    public void handle(DisableAdCommand publishAdCommand) {
+
+    }
+
+    @CommandHandler
+    public void handle(ApproveAdCommand approveAdCommand) {
+
+    }
+
+    @CommandHandler
     public void handle(UpdateTitleCommand updateTitleCommand) {
         this.apply(new TitleUpdatedEvent(
                 updateTitleCommand.aggregateId(),
