@@ -13,8 +13,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,7 +56,9 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
             return false;
         }
 
-        targetAggregateIdElements.stream().map(this::transformCommandElement)
+        targetAggregateIdElements.stream()
+                .map(this::transformCommandElement)
+                .filter(Objects::nonNull)
                 .forEach(aggregateIdDetails::add);
 
         var handlerProperties = commandHandlers.stream()
@@ -68,7 +72,11 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
             return false;
         }
 
-        aggregateIdDetails.forEach(it ->
+        aggregateIdDetails
+                .stream()
+                .filter(HandleAggregateIdDetails::isValid)
+                .sorted(Comparator.comparing(HandleAggregateIdDetails::commandClassName))
+                .forEach(it ->
                 note("Aggregate Details: " + it.toString()));
 //        Map<String, HandleAggregateIdDetails> handleAggregateIdDetails = aggregateIdDetails
 //                .stream()
@@ -87,33 +95,53 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
     }
 
     private HandleAggregateIdDetails transformCommandElement(Element t) {
-        TypeElement element = (TypeElement) typeUtils.asElement(t.getEnclosingElement().asType());
-        var builder = new HandleAggregateIdDetailsBuilder()
-                .accessorKind(t.getKind())
-                .modifiers(t.getModifiers())
-                .accessorName(t.getSimpleName().toString())
-                .commandClassName(element.getQualifiedName().toString());
+        TypeElement enclosingElement = (TypeElement) typeUtils.asElement(t.getEnclosingElement().asType());
+//        if(enclosingElement.getKind() == ElementKind.RECORD) {
+//            if(t.getKind() == ElementKind.RECORD_COMPONENT) {
+//                var recordComponent = (RecordComponentElement) t;
+//                ExecutableElement accessor = recordComponent.getAccessor();
+//                var returnType = (TypeElement) typeUtils.asElement(accessor.getReturnType());
+//                builder.isRecord(true)
+//                        .accessorType(returnType.getQualifiedName().toString());
+//
+//                return builder.build();
+//            }
+//            return null;
+//        }
 
-        switch (t.getKind()) {
-            case METHOD -> {
-                var exec = (ExecutableElement) t;
-                var typeElement = (TypeElement) typeUtils.asElement(exec.getReturnType());
-                builder.isRecord(false)
-                        .accessorType(typeElement.getQualifiedName().toString());
+        var builder = switch (enclosingElement.getKind()) {
+            case RECORD, CLASS -> new HandleAggregateIdDetailsBuilder()
+                    .accessorKind(t.getKind())
+                    .modifiers(t.getModifiers())
+                    .accessorName(t.getSimpleName().toString())
+                    .commandClassName(enclosingElement.getQualifiedName().toString());
+            default -> new HandleAggregateIdDetailsBuilder();
+        };
+
+        if (enclosingElement.getKind() == ElementKind.RECORD && t.getKind() == ElementKind.RECORD_COMPONENT) {
+            var recordComponent = (RecordComponentElement) t;
+            ExecutableElement accessor = recordComponent.getAccessor();
+            var returnType = (TypeElement) typeUtils.asElement(accessor.getReturnType());
+            builder.isRecord(true)
+                    .accessorType(returnType.getQualifiedName().toString());
+        }
+
+        if (enclosingElement.getKind() == ElementKind.CLASS) {
+            switch (t.getKind()) {
+                case METHOD -> {
+                    var exec = (ExecutableElement) t;
+                    var typeElement = (TypeElement) typeUtils.asElement(exec.getReturnType());
+                    builder.isRecord(false)
+                            .accessorType(typeElement.getQualifiedName().toString());
+                }
+                case FIELD -> {
+                    var typeElement = (TypeElement) typeUtils.asElement(t.asType());
+                    builder.isRecord(false)
+                            .accessorType(typeElement.getQualifiedName().toString());
+                }
+
+                default -> note("unhandled");
             }
-            case FIELD -> {
-                var typeElement = (TypeElement) typeUtils.asElement(t.asType());
-                builder.isRecord(true)
-                        .accessorType(typeElement.getQualifiedName().toString());
-            }
-            case RECORD_COMPONENT -> {
-                var recordComponent = (RecordComponentElement) t;
-                ExecutableElement accessor = recordComponent.getAccessor();
-                var returnType = (TypeElement) typeUtils.asElement(accessor.getReturnType());
-                builder.isRecord(true)
-                        .accessorType(returnType.getQualifiedName().toString());
-            }
-            default -> note("unhandled");
         }
         return builder.build();
     }
@@ -173,8 +201,8 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         return Set.of(
-                CommandHandler.class.getCanonicalName(),
-                TargetAggregateId.class.getCanonicalName()
+                CommandHandler.class.getCanonicalName()
+//                TargetAggregateId.class.getCanonicalName()
         );
     }
 
@@ -192,6 +220,10 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
             ElementKind accessorKind, // (FIELD, METHOD, RECORD_COMPONENT)
             boolean isRecord//
     ) {
+        public boolean isValid() {
+            return Strings.isNotNullOrEmpty(commandClassName) && Strings.isNotNullOrEmpty(accessorName)
+                    && !modifiers.isEmpty();
+        }
     }
 
     static class HandleAggregateIdDetailsBuilder {
@@ -233,7 +265,11 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
         }
 
         public HandleAggregateIdDetails build() {
-            return new HandleAggregateIdDetails(commandClassName, accessorName, modifiers, accessorType, accessorKind, isRecord);
+            return new HandleAggregateIdDetails(
+                    commandClassName,
+                    accessorName,
+                    (modifiers == null) ? new HashSet<>() : modifiers,
+                    accessorType, accessorKind, isRecord);
         }
     }
 }
