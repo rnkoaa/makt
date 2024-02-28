@@ -1,4 +1,4 @@
-package io.amoakoagyei;
+package io.amoakoagyei.runtime;
 
 import java.io.BufferedReader;
 import java.io.IOException;

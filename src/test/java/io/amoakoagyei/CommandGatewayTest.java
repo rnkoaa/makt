@@ -5,6 +5,9 @@ import io.amoakoagyei.marketplace.CreateAdCommand;
 import io.amoakoagyei.marketplace.MarketPlaceAd;
 import io.amoakoagyei.marketplace.PublishAdCommand;
 import io.amoakoagyei.marketplace.UpdateTitleCommand;
+import io.amoakoagyei.runtime.ClassIndexLoader;
+import io.amoakoagyei.runtime.CommandHandlerIndexLoader;
+import io.amoakoagyei.runtime.CommandHandlerMetadata;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -63,7 +66,7 @@ class CommandGatewayTest {
 
     @Test
     void ableToFindCommandHandlerDetailsForConstructor() {
-        Optional<CommandHandlerDetails> commandHandler = CommandHandlerIndexLoader.findCommandHandler(CreateAdCommand.class);
+        Optional<CommandHandlerMetadata> commandHandler = CommandHandlerIndexLoader.findCommandHandler(CreateAdCommand.class);
         assertThat(commandHandler).isNotEmpty().hasValueSatisfying(commandHandlerDetail -> {
             assertThat(commandHandlerDetail.aggregateType()).isNotNull().isEqualTo(MarketPlaceAd.class);
             assertThat(commandHandlerDetail.commandType()).isNotNull().isEqualTo(CreateAdCommand.class);
@@ -72,7 +75,7 @@ class CommandGatewayTest {
     }
     @Test
     void ableToFindCommandHandlerDetailsForNonConstructor() {
-        Optional<CommandHandlerDetails> commandHandler = CommandHandlerIndexLoader.findCommandHandler(UpdateTitleCommand.class);
+        Optional<CommandHandlerMetadata> commandHandler = CommandHandlerIndexLoader.findCommandHandler(UpdateTitleCommand.class);
         assertThat(commandHandler).isNotEmpty().hasValueSatisfying(commandHandlerDetail -> {
             assertThat(commandHandlerDetail.aggregateType()).isNotNull().isEqualTo(MarketPlaceAd.class);
             assertThat(commandHandlerDetail.commandType()).isNotNull().isEqualTo(UpdateTitleCommand.class);

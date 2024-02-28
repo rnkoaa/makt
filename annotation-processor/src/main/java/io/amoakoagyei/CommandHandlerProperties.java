@@ -21,15 +21,6 @@ public record CommandHandlerProperties(
         return Objects.equals(methodName, "<init>");
     }
 
-    static CommandHandlerProperties fromLine(String line) {
-        var splitParts = line.split(",");
-        if (splitParts.length < 3) {
-            return null;
-        }
-        return new CommandHandlerProperties(
-                splitParts[0], splitParts[1], splitParts[2], null, null, null, null, new HashSet<>()
-        );
-    }
 
     static CommandHandlerPropertiesBuilder builder() {
         return new CommandHandlerPropertiesBuilder();

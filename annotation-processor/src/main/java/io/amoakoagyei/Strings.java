@@ -6,7 +6,7 @@ public class Strings {
        return value == null || value.isEmpty();
     }
 
-    static boolean isNotNullOrEmpty(String value){
+    public static boolean isNotNullOrEmpty(String value){
         return !isNullOrEmpty(value);
     }
 }

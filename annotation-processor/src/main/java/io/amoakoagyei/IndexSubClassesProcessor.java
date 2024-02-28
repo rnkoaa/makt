@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class IndexSubClassesProcessor extends AbstractAnnotationProcessor {
 
     private static final Set<String> indexedClasses = new HashSet<>();
-    protected static final String INDEXED_SUB_CLASSES = "index-sub-classes.txt";
+    public static final String INDEXED_SUB_CLASSES = "index-sub-classes.txt";
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {

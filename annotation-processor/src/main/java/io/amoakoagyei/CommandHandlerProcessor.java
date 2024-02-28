@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
     private static final Set<CommandHandlerProperties> indexedClasses = new HashSet<>();
     private static final Set<AggregateIdDetails> aggregateIdDetails = new HashSet<>();
-    static final String COMMAND_HANDLER_INDEX = "command-handler-index.txt";
+    public static final String COMMAND_HANDLER_INDEX = "command-handler-index.txt";
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -63,11 +63,6 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
         Map<String, AggregateIdDetails> aggregateIdDetailGroup = aggregateIdDetails
                 .stream()
                 .filter(AggregateIdDetails::isValid)
-                .sorted(Comparator.comparing(AggregateIdDetails::commandClassName))
-//                .forEach(it ->
-//                        note("Aggregate Details: " + it.toString()));
-//         aggregateIdDetails
-//                .stream()
                 .collect(Collectors.toMap(
                         AggregateIdDetails::commandClassName,
                         it -> it
@@ -163,6 +158,7 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
         var nonConstructorHandlers = commandHandlers.stream()
                 .filter(it -> it.getKind() != ElementKind.CONSTRUCTOR)
                 .map(this::getParamType)
+                .filter(Objects::nonNull)
                 .map(it -> it.getQualifiedName().toString())
                 .collect(Collectors.toSet());
         return disjunction(nonConstructorHandlers, targetAggregateIdEnclosingElement);
@@ -170,16 +166,23 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
 
     private CommandHandlerProperties transform(ExecutableElement it) {
         TypeElement paramTypeElement = getParamType(it);
+        if (paramTypeElement == null) {
+            return null;
+        }
+
         String name = it.getSimpleName().toString();
         TypeElement enclosingElement = (TypeElement) it.getEnclosingElement();
         return CommandHandlerProperties.builder()
                 .commandType(paramTypeElement.getQualifiedName().toString())
-                .aggregateType(enclosingElement.getEnclosingElement().toString())
+                .aggregateType(enclosingElement.getQualifiedName().toString())
                 .handlerName(name)
                 .build();
     }
 
     private TypeElement getParamType(ExecutableElement it) {
+        if (it.getParameters().isEmpty()) {
+            return null;
+        }
         VariableElement firstParameter = it.getParameters().getFirst();
         TypeMirror typeParameterMirror = firstParameter.asType();
         return (TypeElement) typeUtils.asElement(typeParameterMirror);

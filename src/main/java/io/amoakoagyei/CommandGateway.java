@@ -1,6 +1,7 @@
 package io.amoakoagyei;
 
 import io.amoakoagyei.infra.CommandAggregateIdDetails;
+import io.amoakoagyei.runtime.CommandHandlerIndexLoader;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
