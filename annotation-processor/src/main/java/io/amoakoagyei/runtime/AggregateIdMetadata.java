@@ -1,5 +1,6 @@
 package io.amoakoagyei.runtime;
 
+import java.util.Objects;
 import java.util.Set;
 
 public record AggregateIdMetadata(
@@ -11,7 +12,12 @@ public record AggregateIdMetadata(
         AccessorKind accessorType // field, method, record_component
 ) {
 
-    boolean isRecord() {
+    public boolean isRecord() {
         return aggregateIdKind == AccessorKind.RECORD;
+    }
+
+    public boolean isValid() {
+        return commandClass != null && aggregateIdClass != null
+                && !Objects.equals(accessorName, "NULL");
     }
 }

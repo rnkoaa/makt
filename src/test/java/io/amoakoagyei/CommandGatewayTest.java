@@ -73,6 +73,7 @@ class CommandGatewayTest {
             assertThat(commandHandlerDetail.commandType()).isNotNull().isEqualTo(CreateAdCommand.class);
             assertThat(commandHandlerDetail.methodName()).isEqualTo("<init>");
             assertThat(commandHandlerDetail.isConstructor()).isTrue();
+            assertThat(commandHandlerDetail.aggregateIdMetadata().isValid()).isFalse();
         });
     }
     @Test
@@ -85,6 +86,7 @@ class CommandGatewayTest {
             assertThat(commandHandlerDetail.isConstructor()).isFalse();
             AggregateIdMetadata aggregateIdMetadata = commandHandlerDetail.aggregateIdMetadata();
             assertThat(aggregateIdMetadata).isNotNull();
+            assertThat(aggregateIdMetadata.isValid()).isTrue();
 
 //            aggregateIdMetadata;
         });
