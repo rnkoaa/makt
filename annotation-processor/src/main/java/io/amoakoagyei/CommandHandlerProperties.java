@@ -2,7 +2,6 @@ package io.amoakoagyei;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,7 +20,6 @@ public record CommandHandlerProperties(
         return Objects.equals(methodName, "<init>");
     }
 
-
     static CommandHandlerPropertiesBuilder builder() {
         return new CommandHandlerPropertiesBuilder();
     }
@@ -32,11 +30,10 @@ public record CommandHandlerProperties(
                 .stream()
                 .map(Enum::name)
                 .collect(Collectors.joining(";"));
-        return "%s,%s,%s,%s,%s,%s,%s,%s,%s".formatted(
+        return "%s,%s,%s,%s,%s,%s,%s,%s".formatted(
                 commandType,
                 aggregateType,
                 methodName,
-                isConstructor(),
                 commandElementType == null ? "NULL" : commandElementType.name(),
                 aggregateElementType == null ? "NULL" : aggregateElementType,
                 aggregateIdAccessorName == null ? "NULL" : aggregateIdAccessorName,

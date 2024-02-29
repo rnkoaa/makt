@@ -5,6 +5,7 @@ import io.amoakoagyei.marketplace.CreateAdCommand;
 import io.amoakoagyei.marketplace.MarketPlaceAd;
 import io.amoakoagyei.marketplace.PublishAdCommand;
 import io.amoakoagyei.marketplace.UpdateTitleCommand;
+import io.amoakoagyei.runtime.AggregateIdMetadata;
 import io.amoakoagyei.runtime.ClassIndexLoader;
 import io.amoakoagyei.runtime.CommandHandlerIndexLoader;
 import io.amoakoagyei.runtime.CommandHandlerMetadata;
@@ -70,6 +71,7 @@ class CommandGatewayTest {
         assertThat(commandHandler).isNotEmpty().hasValueSatisfying(commandHandlerDetail -> {
             assertThat(commandHandlerDetail.aggregateType()).isNotNull().isEqualTo(MarketPlaceAd.class);
             assertThat(commandHandlerDetail.commandType()).isNotNull().isEqualTo(CreateAdCommand.class);
+            assertThat(commandHandlerDetail.methodName()).isEqualTo("<init>");
             assertThat(commandHandlerDetail.isConstructor()).isTrue();
         });
     }
@@ -79,7 +81,12 @@ class CommandGatewayTest {
         assertThat(commandHandler).isNotEmpty().hasValueSatisfying(commandHandlerDetail -> {
             assertThat(commandHandlerDetail.aggregateType()).isNotNull().isEqualTo(MarketPlaceAd.class);
             assertThat(commandHandlerDetail.commandType()).isNotNull().isEqualTo(UpdateTitleCommand.class);
+            assertThat(commandHandlerDetail.methodName()).isEqualTo("handle");
             assertThat(commandHandlerDetail.isConstructor()).isFalse();
+            AggregateIdMetadata aggregateIdMetadata = commandHandlerDetail.aggregateIdMetadata();
+            assertThat(aggregateIdMetadata).isNotNull();
+
+//            aggregateIdMetadata;
         });
     }
 }
