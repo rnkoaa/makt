@@ -6,6 +6,7 @@ import io.amoakoagyei.marketplace.MarketPlaceAd;
 import io.amoakoagyei.marketplace.PublishAdCommand;
 import io.amoakoagyei.marketplace.UpdateTitleCommand;
 import io.amoakoagyei.runtime.*;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -99,5 +100,19 @@ class CommandGatewayTest {
             assertThat(aggregateIdMetadataValue.commandElementKind()).isEqualTo(AccessorKind.RECORD);
             assertThat(aggregateIdMetadataValue.modifiers()).isNotEmpty().contains(ElementModifier.PUBLIC);
         });
+
+    }
+
+    @Test
+    void findAggregateIdOnCommandWithId() {
+        var updateCommand = new UpdateTitleCommand(UUID.randomUUID(), "title");
+        var mayBeCommandHandler = CommandHandlerIndexLoader.findCommandHandler(updateCommand.getClass());
+        assertThat(mayBeCommandHandler).isNotEmpty().hasValueSatisfying(commandHandlerDetail -> {
+            assertThat(commandHandlerDetail.aggregateIdMetadata()).isNotNull();
+        });
+
+        mayBeCommandHandler.flatMap(commandHandlerMetadata -> {
+
+        })
     }
 }

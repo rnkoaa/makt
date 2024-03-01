@@ -12,7 +12,7 @@ public record AggregateIdMetadata(
         AccessorKind accessorType // field, method, record_component
 ) {
 
-    public boolean isRecord() {
+    public boolean isRecordCommand() {
         return commandElementKind == AccessorKind.RECORD;
     }
 
