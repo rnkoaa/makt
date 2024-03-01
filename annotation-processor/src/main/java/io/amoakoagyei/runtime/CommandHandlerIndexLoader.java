@@ -1,8 +1,5 @@
 package io.amoakoagyei.runtime;
 
-import io.amoakoagyei.CommandHandlerProperties;
-
-import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,8 +26,8 @@ public class CommandHandlerIndexLoader {
                     Set<ElementModifier> modifiers = transform(idMetadataInfo.modifiers());
                     var aggregateIdMetadata = new AggregateIdMetadata(
                             commandType,
-                            aggregateIdType.orElse(null),
                             aggregateKind,
+                            aggregateIdType.orElse(null),
                             idMetadataInfo.aggregateIdAccessorName(),
                             modifiers,
                             getKind(idMetadataInfo.aggregateIdAccessorKind())
@@ -85,5 +82,9 @@ public class CommandHandlerIndexLoader {
         };
     }
 
-
+    public static Optional<AggregateIdMetadata> findAggregateIdMetadata(Class<?> clzz) {
+        return findCommandHandler(clzz)
+                .map(CommandHandlerMetadata::aggregateIdMetadata)
+                .filter(AggregateIdMetadata::isValid);
+    }
 }

@@ -5,10 +5,7 @@ import io.amoakoagyei.marketplace.CreateAdCommand;
 import io.amoakoagyei.marketplace.MarketPlaceAd;
 import io.amoakoagyei.marketplace.PublishAdCommand;
 import io.amoakoagyei.marketplace.UpdateTitleCommand;
-import io.amoakoagyei.runtime.AggregateIdMetadata;
-import io.amoakoagyei.runtime.ClassIndexLoader;
-import io.amoakoagyei.runtime.CommandHandlerIndexLoader;
-import io.amoakoagyei.runtime.CommandHandlerMetadata;
+import io.amoakoagyei.runtime.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -76,6 +73,7 @@ class CommandGatewayTest {
             assertThat(commandHandlerDetail.aggregateIdMetadata().isValid()).isFalse();
         });
     }
+
     @Test
     void ableToFindCommandHandlerDetailsForNonConstructor() {
         Optional<CommandHandlerMetadata> commandHandler = CommandHandlerIndexLoader.findCommandHandler(UpdateTitleCommand.class);
@@ -87,8 +85,19 @@ class CommandGatewayTest {
             AggregateIdMetadata aggregateIdMetadata = commandHandlerDetail.aggregateIdMetadata();
             assertThat(aggregateIdMetadata).isNotNull();
             assertThat(aggregateIdMetadata.isValid()).isTrue();
+        });
+    }
 
-//            aggregateIdMetadata;
+    @Test
+    void ableToFindAggregateIdForCommand() {
+        Optional<AggregateIdMetadata> aggregateMetadata = CommandHandlerIndexLoader.findAggregateIdMetadata(UpdateTitleCommand.class);
+        assertThat(aggregateMetadata).isNotEmpty().hasValueSatisfying(aggregateIdMetadataValue -> {
+            assertThat(aggregateIdMetadataValue.commandClass()).isNotNull().isEqualTo(UpdateTitleCommand.class);
+            assertThat(aggregateIdMetadataValue.aggregateIdClass()).isEqualTo(UUID.class);
+            assertThat(aggregateIdMetadataValue.accessorName()).isEqualTo("aggregateId");
+            assertThat(aggregateIdMetadataValue.accessorType()).isEqualTo(AccessorKind.RECORD_COMPONENT);
+            assertThat(aggregateIdMetadataValue.commandElementKind()).isEqualTo(AccessorKind.RECORD);
+            assertThat(aggregateIdMetadataValue.modifiers()).isNotEmpty().contains(ElementModifier.PUBLIC);
         });
     }
 }
