@@ -157,7 +157,7 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
 
         var nonConstructorHandlers = commandHandlers.stream()
                 .filter(it -> it.getKind() != ElementKind.CONSTRUCTOR)
-                .map(this::getParamType)
+                .map(it -> TypeElements.getParamType(typeUtils, it))
                 .filter(Objects::nonNull)
                 .map(it -> it.getQualifiedName().toString())
                 .collect(Collectors.toSet());
@@ -165,7 +165,7 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
     }
 
     private CommandHandlerProperties transform(ExecutableElement it) {
-        TypeElement paramTypeElement = getParamType(it);
+        TypeElement paramTypeElement = TypeElements.getParamType(typeUtils, it);
         if (paramTypeElement == null) {
             return null;
         }
@@ -177,15 +177,6 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
                 .aggregateType(enclosingElement.getQualifiedName().toString())
                 .handlerName(name)
                 .build();
-    }
-
-    private TypeElement getParamType(ExecutableElement it) {
-        if (it.getParameters().isEmpty()) {
-            return null;
-        }
-        VariableElement firstParameter = it.getParameters().getFirst();
-        TypeMirror typeParameterMirror = firstParameter.asType();
-        return (TypeElement) typeUtils.asElement(typeParameterMirror);
     }
 
     @Override
