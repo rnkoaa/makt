@@ -55,14 +55,8 @@ public class MarketPlaceAd extends Aggregate {
 
     @EventSourcingHandler
     public void on(AdCreatedEvent event) {
+        this.id = event.getAggregateId();
         this.title = event.title();
-    }
-
-    @Override
-    public String toString() {
-        return "MarketPlaceAd{" +
-                "title='" + title + '\'' +
-                '}';
     }
 
     @CommandHandler
@@ -86,5 +80,21 @@ public class MarketPlaceAd extends Aggregate {
                 updateTitleCommand.aggregateId(),
                 updateTitleCommand.title()
         ));
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public String toString() {
+        return "MarketPlaceAd{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                '}';
     }
 }

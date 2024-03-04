@@ -62,13 +62,14 @@ public record CommandHandlerMetadata(
     }
 
     record RawAggregateIdMetadata(
-            String commandClassName,
+            String enclosingClassName,
             String aggregateIdElementKind,
             String aggregateIdElementType,
             String aggregateIdAccessorName,
             String aggregateIdAccessorKind,
             Set<String> modifiers
     ) {
+
 
     }
 }

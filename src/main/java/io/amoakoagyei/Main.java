@@ -22,13 +22,17 @@ public class Main {
             ad.handle((UpdateTitleCommand) updateTitleCommand);
             return Result.success(ad);
         });
-        CommandGateway commandGateway = new CommandGateway(commandHandlers);
+        final AggregateStore aggregateStore = new AggregateStore();
+        CommandGateway commandGateway = new CommandGateway(aggregateStore);
 
         var result = commandGateway.handle(new CreateAdCommand("First Command"));
 
         switch (result) {
             case Failure(Exception ex) -> System.out.println(ex.getMessage());
-            case Success(MarketPlaceAd marketPlaceAd) -> System.out.println(marketPlaceAd);
+            case Success(MarketPlaceAd marketPlaceAd) -> {
+                System.out.println(marketPlaceAd);
+                marketPlaceAd.getEvents().forEach(System.out::println);
+            }
             default -> System.out.println("unknown");
         }
     }

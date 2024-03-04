@@ -1,12 +1,10 @@
 package io.amoakoagyei;
 
-import io.amoakoagyei.marketplace.ApproveAdCommand;
 import io.amoakoagyei.marketplace.CreateAdCommand;
 import io.amoakoagyei.marketplace.MarketPlaceAd;
-import io.amoakoagyei.marketplace.PublishAdCommand;
 import io.amoakoagyei.marketplace.UpdateTitleCommand;
 import io.amoakoagyei.runtime.*;
-import org.assertj.core.api.AssertionsForClassTypes;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -17,45 +15,63 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 class CommandGatewayTest {
 
-    private final CommandHandlers commandHandlers = new CommandHandlers();
-    private final CommandGateway commandGateway = new CommandGateway(commandHandlers);
+    private final AggregateStore aggregateStore = new AggregateStore();
+    private final CommandGateway commandGateway = new CommandGateway(aggregateStore);
 
-    @Test
-    void findAggregateIdOnCommandWithoutId() {
-        var createCommand = new CreateAdCommand("title");
-        Result<?> aggregateId = commandGateway.findAggregateId(createCommand);
-        assertThat(aggregateId.isFailure()).isTrue();
-        assertThat(aggregateId.exceptionOrNull()).isNotNull().isInstanceOf(RuntimeException.class);
+    @AfterEach
+    void tearDown() {
+        aggregateStore.clear();
     }
 
     @Test
-    void findAggregateIdOnCommandForRecordTypeWithAnnotation() {
-        var updateCommand = new UpdateTitleCommand(UUID.randomUUID(), "title");
-        Result<?> aggregateIdResult = commandGateway.findAggregateId(updateCommand);
-        assertThat(aggregateIdResult.isSuccess()).isTrue();
-
-        var aggregateId = (UUID) aggregateIdResult.getOrNull();
-        assertThat(aggregateId).isNotNull().isEqualTo(updateCommand.aggregateId());
+    void constructorCanBeInvokedForCommand() {
+        var createCommand = new CreateAdCommand("created a new ad");
+        var result = commandGateway.handle(createCommand);
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getOrNull()).isNotNull().satisfies(s -> {
+            assertThat(s).isNotNull();
+            assertThat(s.getClass()).isEqualTo(MarketPlaceAd.class);
+            var marketPlace = (MarketPlaceAd) s;
+            assertThat(marketPlace.getEvents()).isNotEmpty().hasSize(1);
+        });
     }
 
-    @Test
-    void findAggregateIdOnCommandForClassTypeWithAnnotation() {
-        var updateCommand = new ApproveAdCommand(UUID.randomUUID(), "unknown");
-        Result<?> aggregateIdResult = commandGateway.findAggregateId(updateCommand);
-        assertThat(aggregateIdResult.isSuccess()).isTrue();
+//    @Test
+//    void findAggregateIdOnCommandWithoutId() {
+//        var createCommand = new CreateAdCommand("title");
+//        Result<?> aggregateId = commandGateway.findAggregateId(createCommand);
+//        assertThat(aggregateId.isFailure()).isTrue();
+//        assertThat(aggregateId.exceptionOrNull()).isNotNull().isInstanceOf(RuntimeException.class);
+//    }
+//
+//    @Test
+//    void findAggregateIdOnCommandForRecordTypeWithAnnotation() {
+//        var updateCommand = new UpdateTitleCommand(UUID.randomUUID(), "title");
+//        Result<?> aggregateIdResult = commandGateway.findAggregateId(updateCommand);
+//        assertThat(aggregateIdResult.isSuccess()).isTrue();
+//
+//        var aggregateId = (UUID) aggregateIdResult.getOrNull();
+//        assertThat(aggregateId).isNotNull().isEqualTo(updateCommand.aggregateId());
+//    }
 
-        var aggregateId = (UUID) aggregateIdResult.getOrNull();
-        assertThat(aggregateId).isNotNull().isEqualTo(updateCommand.getId());
-    }
-
-    @Test
-    void findAggregateIdOnCommandForClassMethodWithAnnotation() {
-        var updateCommand = new PublishAdCommand(UUID.randomUUID());
-        Result<?> aggregateIdResult = commandGateway.findAggregateId(updateCommand);
-
-        var aggregateId = (UUID) aggregateIdResult.getOrNull();
-        assertThat(aggregateId).isNotNull().isEqualTo(updateCommand.getId());
-    }
+//    @Test
+//    void findAggregateIdOnCommandForClassTypeWithAnnotation() {
+//        var updateCommand = new ApproveAdCommand(UUID.randomUUID(), "unknown");
+//        Result<?> aggregateIdResult = commandGateway.findAggregateId(updateCommand);
+//        assertThat(aggregateIdResult.isSuccess()).isTrue();
+//
+//        var aggregateId = (UUID) aggregateIdResult.getOrNull();
+//        assertThat(aggregateId).isNotNull().isEqualTo(updateCommand.getId());
+//    }
+//
+//    @Test
+//    void findAggregateIdOnCommandForClassMethodWithAnnotation() {
+//        var updateCommand = new PublishAdCommand(UUID.randomUUID());
+//        Result<?> aggregateIdResult = commandGateway.findAggregateId(updateCommand);
+//
+//        var aggregateId = (UUID) aggregateIdResult.getOrNull();
+//        assertThat(aggregateId).isNotNull().isEqualTo(updateCommand.getId());
+//    }
 
     @Test
     void findAggregateClasses() {
@@ -93,7 +109,7 @@ class CommandGatewayTest {
     void ableToFindAggregateIdForCommand() {
         Optional<AggregateIdMetadata> aggregateMetadata = CommandHandlerIndexLoader.findAggregateIdMetadata(UpdateTitleCommand.class);
         assertThat(aggregateMetadata).isNotEmpty().hasValueSatisfying(aggregateIdMetadataValue -> {
-            assertThat(aggregateIdMetadataValue.commandClass()).isNotNull().isEqualTo(UpdateTitleCommand.class);
+            assertThat(aggregateIdMetadataValue.enclosingClass()).isNotNull().isEqualTo(UpdateTitleCommand.class);
             assertThat(aggregateIdMetadataValue.aggregateIdClass()).isEqualTo(UUID.class);
             assertThat(aggregateIdMetadataValue.accessorName()).isEqualTo("aggregateId");
             assertThat(aggregateIdMetadataValue.accessorType()).isEqualTo(AccessorKind.RECORD_COMPONENT);
@@ -101,18 +117,5 @@ class CommandGatewayTest {
             assertThat(aggregateIdMetadataValue.modifiers()).isNotEmpty().contains(ElementModifier.PUBLIC);
         });
 
-    }
-
-    @Test
-    void findAggregateIdOnCommandWithId() {
-        var updateCommand = new UpdateTitleCommand(UUID.randomUUID(), "title");
-        var mayBeCommandHandler = CommandHandlerIndexLoader.findCommandHandler(updateCommand.getClass());
-        assertThat(mayBeCommandHandler).isNotEmpty().hasValueSatisfying(commandHandlerDetail -> {
-            assertThat(commandHandlerDetail.aggregateIdMetadata()).isNotNull();
-        });
-
-        mayBeCommandHandler.flatMap(commandHandlerMetadata -> {
-
-        })
     }
 }
