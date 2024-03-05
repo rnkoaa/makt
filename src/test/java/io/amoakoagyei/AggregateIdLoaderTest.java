@@ -1,7 +1,6 @@
 package io.amoakoagyei;
 
 import io.amoakoagyei.marketplace.AdCreatedEvent;
-import io.amoakoagyei.marketplace.CreateAdCommand;
 import io.amoakoagyei.marketplace.MarketPlaceAd;
 import io.amoakoagyei.marketplace.UpdateTitleCommand;
 import io.amoakoagyei.runtime.AccessorKind;

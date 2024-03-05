@@ -1,10 +1,10 @@
 package io.amoakoagyei;
 
-import com.google.auto.service.AutoService;
-
-import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.*;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.util.HashSet;
@@ -37,7 +37,7 @@ record EventSourcingElementMetadata(
     }
 }
 
-@AutoService(Processor.class)
+//@AutoService(Processor.class)
 public class EventSourcingHandlerProcessor extends AbstractAnnotationProcessor {
     private static final Set<EventSourcingElementMetadata> eventSourcingElementMetadata = new HashSet<>();
     public static final String EVENT_SOURCE_HANDLER_INDEX = "event-source-handler-index.txt";
@@ -87,27 +87,7 @@ public class EventSourcingHandlerProcessor extends AbstractAnnotationProcessor {
                 (element == null) ? "NULL" : element.getQualifiedName().toString(),
                 executableElement.getModifiers()
         );
-//        return new EventSourcingElementMetadata(
-//                paramTypeElement.getQualifiedName().toString(),
-//                enclosingElement.getQualifiedName().toString(),
-//                name,
-//                element.getQualifiedName().toString(),
-//                executableElement.getModifiers()
-//        );
     }
-
-    /*
-      private CommandHandlerProperties transform(ExecutableElement it) {
-
-        String name = it.getSimpleName().toString();
-        TypeElement enclosingElement = (TypeElement) it.getEnclosingElement();
-        return CommandHandlerProperties.builder()
-                .commandType(paramTypeElement.getQualifiedName().toString())
-                .aggregateType(enclosingElement.getQualifiedName().toString())
-                .handlerName(name)
-                .build();
-    }
-     */
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {

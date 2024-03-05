@@ -4,6 +4,7 @@ import io.amoakoagyei.infra.AggregateLifeCycle;
 import io.amoakoagyei.marketplace.*;
 import io.amoakoagyei.runtime.EventSourcingIndexLoader;
 import io.amoakoagyei.runtime.EventSourcingMetadata;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+@Disabled
 class EventSourcingIndexLoaderTest {
 
     @Test

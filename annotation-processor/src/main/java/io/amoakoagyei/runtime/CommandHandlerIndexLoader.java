@@ -16,8 +16,9 @@ public class CommandHandlerIndexLoader {
                 .map(CommandHandlerMetadata::fromLine)
                 .filter(Objects::nonNull)
                 .forEach(handler -> {
-                    var commandType = ClassIndexLoader.loadClass(handler.commandClassName()).orElse(null);
+                    var commandType = ClassIndexLoader.loadClass(handler.aggregateAttributeClass()).orElse(null);
                     var aggregateType = ClassIndexLoader.loadClass(handler.aggregateClassName()).orElse(null);
+                    var methodReturnType = ClassIndexLoader.loadClass(handler.methodReturnType()).orElse(void.class);
 
                     var idMetadataInfo = handler.rawAggregateIdMetadata();
                     var aggregateIdType = ClassIndexLoader.loadClass(idMetadataInfo.aggregateIdElementType());
@@ -33,11 +34,12 @@ public class CommandHandlerIndexLoader {
                             getKind(idMetadataInfo.aggregateIdAccessorKind())
                     );
                     commandTypes.put(
-                            handler.commandClassName(),
+                            handler.aggregateAttributeClass(),
                             new CommandHandlerMetadata(
                                     commandType,
                                     aggregateType,
                                     handler.handlerMethodName(),
+                                    methodReturnType,
                                     aggregateIdMetadata
                             )
                     );

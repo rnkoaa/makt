@@ -5,11 +5,9 @@ import com.google.auto.service.AutoService;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @AutoService(Processor.class)
@@ -27,6 +25,17 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
                 .filter(it -> !it.getParameters().isEmpty())
                 .collect(Collectors.toSet());
 
+        var eventSourcingHandlers = roundEnv.getElementsAnnotatedWith(EventSourcingHandler.class)
+                .stream()
+                .filter(it -> (it.getKind() == ElementKind.METHOD || it.getKind() == ElementKind.CONSTRUCTOR))
+                .map(it -> (ExecutableElement) it)
+                .filter(it -> !it.getParameters().isEmpty())
+                .collect(Collectors.toSet());
+
+        Set<ExecutableElement> attributeHandlers = new HashSet<>(commandHandlers);
+        attributeHandlers.addAll(eventSourcingHandlers);
+
+
         var targetAggregateIdElements = roundEnv.getElementsAnnotatedWith(TargetAggregateId.class)
                 .stream()
                 .filter(it -> (
@@ -36,8 +45,7 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
                 )
                 .collect(Collectors.toSet());
 
-
-        Set<String> intersection = validateCommands(commandHandlers, targetAggregateIdElements);
+        Set<String> intersection = validateCommands(attributeHandlers, targetAggregateIdElements);
         if (!intersection.isEmpty()) {
             intersection.forEach(cmd ->
                     error(("Class %s is used as a CommandHandler Parameter but does not have a " +
@@ -52,7 +60,7 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
                 .filter(Objects::nonNull)
                 .forEach(aggregateIdDetails::add);
 
-        var handlerProperties = commandHandlers.stream()
+        var handlerProperties = attributeHandlers.stream()
                 .filter(it -> !it.getParameters().isEmpty())
                 .map(this::transform)
                 .collect(Collectors.toSet());
@@ -69,7 +77,6 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
                         AggregateIdDetails::commandClassName,
                         it -> it
                 ));
-
 
         try {
             var indexedAggregateIdElements = enrich(indexedClasses, aggregateIdDetailGroup)
@@ -88,7 +95,7 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
         return indexedClasses.stream()
                 .map(it -> {
                     var builder = it.toBuilder();
-                    var aggregateIdDetails = aggregateIdDetailGroup.get(it.commandType());
+                    var aggregateIdDetails = aggregateIdDetailGroup.get(it.aggregateAttributeType());
                     if (aggregateIdDetails != null) {
                         builder
                                 .commandElementType(aggregateIdDetails.isRecord() ? ElementKind.RECORD : ElementKind.CLASS)
@@ -171,19 +178,30 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
             return null;
         }
 
+        String returnTypeName = "void.class";
+        if (it.getKind() != ElementKind.CONSTRUCTOR) {
+            var returnTypeElement = (TypeElement) typeUtils.asElement(it.getReturnType());
+            if (returnTypeElement != null) {
+                returnTypeName = returnTypeElement.getQualifiedName().toString();
+            }
+        }
+
         String name = it.getSimpleName().toString();
         TypeElement enclosingElement = (TypeElement) it.getEnclosingElement();
+
         return CommandHandlerProperties.builder()
-                .commandType(paramTypeElement.getQualifiedName().toString())
+                .aggregateAttributeType(paramTypeElement.getQualifiedName().toString())
                 .aggregateType(enclosingElement.getQualifiedName().toString())
                 .handlerName(name)
+                .methodReturnType(returnTypeName)
                 .build();
     }
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         return Set.of(
-                CommandHandler.class.getCanonicalName()
+                CommandHandler.class.getCanonicalName(),
+                EventSourcingHandler.class.getCanonicalName()
         );
     }
 

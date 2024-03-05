@@ -7,7 +7,6 @@ import io.amoakoagyei.runtime.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,7 +40,7 @@ class CommandGatewayTest {
         Optional<CommandHandlerMetadata> commandHandler = CommandHandlerIndexLoader.findCommandHandler(CreateAdCommand.class);
         assertThat(commandHandler).isNotEmpty().hasValueSatisfying(commandHandlerDetail -> {
             assertThat(commandHandlerDetail.aggregateType()).isNotNull().isEqualTo(MarketPlaceAd.class);
-            assertThat(commandHandlerDetail.commandType()).isNotNull().isEqualTo(CreateAdCommand.class);
+            assertThat(commandHandlerDetail.aggregateAttributeClass()).isNotNull().isEqualTo(CreateAdCommand.class);
             assertThat(commandHandlerDetail.methodName()).isEqualTo("<init>");
             assertThat(commandHandlerDetail.isConstructor()).isTrue();
             AggregateIdMetadata aggregateIdMetadata = commandHandlerDetail.aggregateIdMetadata();
@@ -55,7 +54,7 @@ class CommandGatewayTest {
         Optional<CommandHandlerMetadata> commandHandler = CommandHandlerIndexLoader.findCommandHandler(UpdateTitleCommand.class);
         assertThat(commandHandler).isNotEmpty().hasValueSatisfying(commandHandlerDetail -> {
             assertThat(commandHandlerDetail.aggregateType()).isNotNull().isEqualTo(MarketPlaceAd.class);
-            assertThat(commandHandlerDetail.commandType()).isNotNull().isEqualTo(UpdateTitleCommand.class);
+            assertThat(commandHandlerDetail.aggregateAttributeClass()).isNotNull().isEqualTo(UpdateTitleCommand.class);
             assertThat(commandHandlerDetail.methodName()).isEqualTo("handle");
             assertThat(commandHandlerDetail.isConstructor()).isFalse();
             AggregateIdMetadata aggregateIdMetadata = commandHandlerDetail.aggregateIdMetadata();

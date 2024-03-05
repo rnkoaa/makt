@@ -1,8 +1,8 @@
 package io.amoakoagyei.infra;
 
 import io.amoakoagyei.Result;
-import io.amoakoagyei.runtime.EventSourcingIndexLoader;
-import io.amoakoagyei.runtime.EventSourcingMetadata;
+import io.amoakoagyei.runtime.CommandHandlerIndexLoader;
+import io.amoakoagyei.runtime.CommandHandlerMetadata;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AggregateLifeCycle {
     private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
     private static final Map<Object, List<AggregateEvent>> aggregateEvents = new ConcurrentHashMap<>();
+    private static final AggregateEventStore aggregateEventStore = new AggregateEventStore();
 
     public static Result<Object> applyEvent(Object aggregate, Object event) {
         if (aggregate == null) {
@@ -27,7 +28,7 @@ public class AggregateLifeCycle {
     }
 
     private static Result<Object> applyOnlyEvent(Object aggregate, Object event) {
-        return Result.of(EventSourcingIndexLoader.findAggregateIdMetadata(event.getClass()))
+        return Result.of(CommandHandlerIndexLoader.findCommandHandler(event.getClass()))
                 .flatMap(eventSourcingMetadata -> applyHandleEvent(aggregate, event, eventSourcingMetadata));
     }
 
@@ -50,10 +51,10 @@ public class AggregateLifeCycle {
                 ));
     }
 
-    private static Result<Object> applyHandleEvent(Object aggregate, Object event, EventSourcingMetadata eventSourcingMetadata) {
+    private static Result<Object> applyHandleEvent(Object aggregate, Object event, CommandHandlerMetadata eventSourcingMetadata) {
         try {
             var methodType = MethodType.methodType(eventSourcingMetadata.methodReturnType(), event.getClass());
-            var methodHandle = lookup.findVirtual(aggregate.getClass(), eventSourcingMetadata.accessorName(), methodType);
+            var methodHandle = lookup.findVirtual(aggregate.getClass(), eventSourcingMetadata.methodName(), methodType);
             methodHandle.invoke(aggregate, event);
             return Result.success(aggregate);
         } catch (NoSuchMethodException | IllegalAccessException e) {

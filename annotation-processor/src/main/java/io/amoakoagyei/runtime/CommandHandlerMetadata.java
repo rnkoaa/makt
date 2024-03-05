@@ -8,9 +8,10 @@ import java.util.Objects;
 import java.util.Set;
 
 public record CommandHandlerMetadata(
-        Class<?> commandType,
+        Class<?> aggregateAttributeClass, // class of Event or Command
         Class<?> aggregateType,
         String methodName,
+        Class<?> methodReturnType,
         AggregateIdMetadata aggregateIdMetadata
 ) {
     public boolean isConstructor() {
@@ -19,22 +20,23 @@ public record CommandHandlerMetadata(
 
     static RawCommandHandlerMetadata fromLine(String line) {
         var splitParts = line.split(",");
-        if (splitParts.length < 8) {
+        if (splitParts.length < 9) {
             return null;
         }
-        var commandClassName = splitParts[0];
+        var aggregateAttributeClass = splitParts[0];
         var aggregateClassName = splitParts[1];
         var handlerMethodName = splitParts[2];
-        var aggregateIdElementKind = splitParts[3];
-        var aggregateIdElementType = splitParts[4];
-        var aggregateIdAccessorName = splitParts[5];
-        var aggregateIdAccessorKind = splitParts[6];
-        var aggregateIdAccessorModifiers = splitParts[7] == null ?
+        var methodReturnType = splitParts[3];
+        var aggregateIdElementKind = splitParts[4];
+        var aggregateIdElementType = splitParts[5];
+        var aggregateIdAccessorName = splitParts[6];
+        var aggregateIdAccessorKind = splitParts[7];
+        var aggregateIdAccessorModifiers = splitParts[8] == null ?
                 new HashSet<String>() :
-                Sets.newHashSet(splitParts[7]);
+                Sets.newHashSet(splitParts[9]);
 
         var rawAggregateIdMetadata = new RawAggregateIdMetadata(
-                commandClassName,
+                aggregateAttributeClass,
                 aggregateIdElementKind,
                 aggregateIdElementType,
                 aggregateIdAccessorName,
@@ -43,22 +45,21 @@ public record CommandHandlerMetadata(
         );
 
         return new RawCommandHandlerMetadata(
-                commandClassName, aggregateClassName, handlerMethodName, rawAggregateIdMetadata
+                aggregateAttributeClass, aggregateClassName, handlerMethodName, methodReturnType, rawAggregateIdMetadata
         );
     }
 
     public boolean isValid() {
-        return commandType != null && aggregateType != null
+        return aggregateAttributeClass != null && aggregateType != null
                 && Strings.isNotNullOrEmpty(methodName);
     }
 
     record RawCommandHandlerMetadata(
-            String commandClassName, String aggregateClassName, String handlerMethodName,
+            String aggregateAttributeClass, String aggregateClassName,
+            String handlerMethodName,
+            String methodReturnType,
             RawAggregateIdMetadata rawAggregateIdMetadata
     ) {
-        boolean isConstructor() {
-            return Objects.equals(handlerMethodName, "<init>");
-        }
     }
 
     record RawAggregateIdMetadata(
@@ -69,7 +70,5 @@ public record CommandHandlerMetadata(
             String aggregateIdAccessorKind,
             Set<String> modifiers
     ) {
-
-
     }
 }

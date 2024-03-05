@@ -56,9 +56,10 @@ public class MarketPlaceAd extends Aggregate {
     }
 
     @EventSourcingHandler
-    public void on(AdCreatedEvent event) {
+    public MarketPlaceAd on(AdCreatedEvent event) {
         this.id = event.getAggregateId();
         this.title = event.title();
+        return this;
     }
 
     @EventSourcingHandler

@@ -2,7 +2,6 @@ package io.amoakoagyei;
 
 import io.amoakoagyei.marketplace.CreateAdCommand;
 import io.amoakoagyei.marketplace.MarketPlaceAd;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
