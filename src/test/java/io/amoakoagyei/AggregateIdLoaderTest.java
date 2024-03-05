@@ -1,8 +1,6 @@
 package io.amoakoagyei;
 
-import io.amoakoagyei.marketplace.AdCreatedEvent;
-import io.amoakoagyei.marketplace.MarketPlaceAd;
-import io.amoakoagyei.marketplace.UpdateTitleCommand;
+import io.amoakoagyei.marketplace.*;
 import io.amoakoagyei.runtime.AccessorKind;
 import io.amoakoagyei.runtime.AggregateIdMetadata;
 import io.amoakoagyei.runtime.ElementModifier;
@@ -12,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class AggregateIdLoaderTest {
 
@@ -22,7 +20,7 @@ public class AggregateIdLoaderTest {
         var aggregate = new MarketPlaceAd();
         aggregate.on(new AdCreatedEvent(aggregateId, "First Title"));
 
-        AssertionsForClassTypes.assertThat(aggregate.getTitle()).isEqualTo("First Title");
+        assertThat(aggregate.getTitle()).isEqualTo("First Title");
         AssertionsForClassTypes.assertThat(aggregate.getId()).isEqualTo(aggregateId);
 
         var aggregateMetadata = new AggregateIdMetadata(
@@ -52,6 +50,34 @@ public class AggregateIdLoaderTest {
                     .isNotNull()
                     .isInstanceOf(UUID.class)
                     .isEqualTo(updateTitleCommand.aggregateId());
+        });
+    }
+
+    @Test
+    void loadIdFromValidEvent() {
+        var titleUpdatedEvent = new TitleUpdatedEvent(UUID.randomUUID(), "update title");
+        var aggregateIdOptions = AggregateIdLoader.extractAggregateId(titleUpdatedEvent);
+        assertThat(aggregateIdOptions.isSuccess()).isTrue();
+        assertThat(aggregateIdOptions).satisfies(s -> {
+            AggregateIdLoader.AggregateIdOptions idOptions = s.getOrNull();
+            assertThat(idOptions.id())
+                    .isNotNull()
+                    .isInstanceOf(UUID.class)
+                    .isEqualTo(titleUpdatedEvent.aggregateId());
+        });
+    }
+
+    @Test
+    void loadIdFromValidEventClass() {
+        var adCompletedEvent = new AdCompletedEvent(UUID.randomUUID());
+        var aggregateIdOptions = AggregateIdLoader.extractAggregateId(adCompletedEvent);
+        assertThat(aggregateIdOptions.isSuccess()).isTrue();
+        assertThat(aggregateIdOptions).satisfies(s -> {
+            AggregateIdLoader.AggregateIdOptions idOptions = s.getOrNull();
+            assertThat(idOptions.id())
+                    .isNotNull()
+                    .isInstanceOf(UUID.class)
+                    .isEqualTo(adCompletedEvent.getAggregateId());
         });
     }
 }

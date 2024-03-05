@@ -44,6 +44,7 @@ public class MarketPlaceAd extends Aggregate {
     private String approver;
     private boolean enabled = true;
     private boolean published = false;
+    private boolean completed = false;
 
     public MarketPlaceAd() {
         super();
@@ -53,6 +54,12 @@ public class MarketPlaceAd extends Aggregate {
     public MarketPlaceAd(CreateAdCommand command) {
         super();
         this.apply(new AdCreatedEvent(command.id(), command.title()));
+    }
+
+    @EventSourcingHandler
+    public MarketPlaceAd on(AdCompletedEvent event) {
+       this.completed = true;
+       return this;
     }
 
     @EventSourcingHandler
@@ -123,6 +130,10 @@ public class MarketPlaceAd extends Aggregate {
 
     public boolean isPublished() {
         return published;
+    }
+
+    public boolean isCompleted() {
+        return completed;
     }
 
     @Override
