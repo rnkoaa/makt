@@ -33,7 +33,7 @@ public record CommandHandlerMetadata(
         var aggregateIdAccessorKind = splitParts[7];
         var aggregateIdAccessorModifiers = splitParts[8] == null ?
                 new HashSet<String>() :
-                Sets.newHashSet(splitParts[9]);
+                Sets.newHashSet(splitParts[8]);
 
         var rawAggregateIdMetadata = new RawAggregateIdMetadata(
                 aggregateAttributeClass,

@@ -20,6 +20,9 @@ public class AggregateIdentifierIndexLoader {
                 .map(it -> it.split(","))
                 .filter(it -> it.length >= 5)
                 .map(it -> {
+                    var modifierIdentifiers = Sets.newHashSet(it[4].split(";"));
+                    var modifierSet = CommandHandlerIndexLoader.transform(modifierIdentifiers);
+
                     var accessorName = it[0];
                     var aggregateIdType = ClassIndexLoader.loadClass(it[1]).orElse(null);
                     var enclosingClass = ClassIndexLoader.loadClass(it[2]).orElse(null);
