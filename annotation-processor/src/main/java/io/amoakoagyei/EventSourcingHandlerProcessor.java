@@ -19,9 +19,10 @@ record EventSourcingElementMetadata(
         Set<Modifier> modifiers
 
 ) {
+
     @Override
     public String toString() {
-        String mfs = modifiers == null ? "NULL" : modifiers
+        String mfs = modifiers == null ? "void" : modifiers
                 .stream()
                 .map(Enum::name)
                 .collect(Collectors.joining(";"));

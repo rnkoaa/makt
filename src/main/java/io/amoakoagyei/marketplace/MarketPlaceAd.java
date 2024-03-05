@@ -40,8 +40,10 @@ public class MarketPlaceAd extends Aggregate {
 
     @AggregateIdentifier
     private UUID id;
-
     private String title;
+    private String approver;
+    private boolean enabled = true;
+    private boolean published = false;
 
     public MarketPlaceAd() {
         super();
@@ -59,19 +61,39 @@ public class MarketPlaceAd extends Aggregate {
         this.title = event.title();
     }
 
+    @EventSourcingHandler
+    public void on(AdApprovedEvent event) {
+        this.approver = event.approver();
+    }
+
+    @EventSourcingHandler
+    public void on(AdDisabledEvent ignored) {
+        this.enabled = false;
+    }
+
+    @EventSourcingHandler
+    public void on(AdPublishedEvent ignored) {
+        this.published = true;
+    }
+
+    @EventSourcingHandler
+    public void on(TitleUpdatedEvent titleUpdatedEvent) {
+        this.title = titleUpdatedEvent.title();
+    }
+
     @CommandHandler
     public void handle(PublishAdCommand publishAdCommand) {
-
+        this.apply(new AdPublishedEvent(publishAdCommand.getId()));
     }
 
     @CommandHandler
     public void handle(DisableAdCommand publishAdCommand) {
-
+        this.apply(new AdDisabledEvent(publishAdCommand.id()));
     }
 
     @CommandHandler
     public void handle(ApproveAdCommand approveAdCommand) {
-
+        this.apply(new AdApprovedEvent(approveAdCommand.getId(), approveAdCommand.getApprover()));
     }
 
     @CommandHandler
@@ -90,11 +112,26 @@ public class MarketPlaceAd extends Aggregate {
         return title;
     }
 
+    public String getApprover() {
+        return approver;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isPublished() {
+        return published;
+    }
+
     @Override
     public String toString() {
         return "MarketPlaceAd{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
+                ", approver='" + approver + '\'' +
+                ", published='" + published + '\'' +
+                ", enabled='" + enabled + '\'' +
                 '}';
     }
 }

@@ -5,17 +5,17 @@ import java.util.List;
 
 @IndexSubClasses
 public abstract class Aggregate {
-    private final List<Event> events;
+    private final List<Object> events;
 
     public Aggregate() {
         this.events = new ArrayList<>();
     }
 
-    public List<Event> getEvents() {
+    public List<Object> getEvents() {
         return events;
     }
 
-    public void apply(Event event) {
+    public void apply(Object event) {
         this.events.add(event);
     }
 }
