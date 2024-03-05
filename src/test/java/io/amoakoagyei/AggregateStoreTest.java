@@ -5,6 +5,8 @@ import io.amoakoagyei.marketplace.MarketPlaceAd;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class AggregateStoreTest {
@@ -13,7 +15,7 @@ class AggregateStoreTest {
     void validateAggregateStore() {
         var aggregateStore = new AggregateStore();
 
-        var marketAd = new MarketPlaceAd(new CreateAdCommand("created Ad"));
+        var marketAd = new MarketPlaceAd(new CreateAdCommand(UUID.randomUUID(), "created Ad"));
 
         aggregateStore.save(marketAd.getId(), marketAd);
 

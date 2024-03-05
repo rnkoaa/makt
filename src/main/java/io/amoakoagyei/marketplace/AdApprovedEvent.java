@@ -5,6 +5,7 @@ import io.amoakoagyei.TargetAggregateId;
 import java.util.UUID;
 
 public record AdApprovedEvent(
+        @TargetAggregateId
         UUID aggregateId,
         String approver
 ) {

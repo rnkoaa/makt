@@ -7,10 +7,13 @@ import io.amoakoagyei.runtime.EventSourcingMetadata;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AggregateLifeCycle {
     private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
+    private static final Map<Object, List<AggregateEvent>> aggregateEvents = new ConcurrentHashMap<>();
 
     public static Result<Object> applyEvent(Object aggregate, Object event) {
         if (aggregate == null) {

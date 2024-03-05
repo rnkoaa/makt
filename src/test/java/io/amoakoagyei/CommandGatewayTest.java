@@ -25,7 +25,7 @@ class CommandGatewayTest {
 
     @Test
     void constructorCanBeInvokedForCommand() {
-        var createCommand = new CreateAdCommand("created a new ad");
+        var createCommand = new CreateAdCommand(UUID.randomUUID(), "created a new ad");
         var result = commandGateway.handle(createCommand);
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getOrNull()).isNotNull().satisfies(s -> {
@@ -36,49 +36,6 @@ class CommandGatewayTest {
         });
     }
 
-//    @Test
-//    void findAggregateIdOnCommandWithoutId() {
-//        var createCommand = new CreateAdCommand("title");
-//        Result<?> aggregateId = commandGateway.findAggregateId(createCommand);
-//        assertThat(aggregateId.isFailure()).isTrue();
-//        assertThat(aggregateId.exceptionOrNull()).isNotNull().isInstanceOf(RuntimeException.class);
-//    }
-//
-//    @Test
-//    void findAggregateIdOnCommandForRecordTypeWithAnnotation() {
-//        var updateCommand = new UpdateTitleCommand(UUID.randomUUID(), "title");
-//        Result<?> aggregateIdResult = commandGateway.findAggregateId(updateCommand);
-//        assertThat(aggregateIdResult.isSuccess()).isTrue();
-//
-//        var aggregateId = (UUID) aggregateIdResult.getOrNull();
-//        assertThat(aggregateId).isNotNull().isEqualTo(updateCommand.aggregateId());
-//    }
-
-//    @Test
-//    void findAggregateIdOnCommandForClassTypeWithAnnotation() {
-//        var updateCommand = new ApproveAdCommand(UUID.randomUUID(), "unknown");
-//        Result<?> aggregateIdResult = commandGateway.findAggregateId(updateCommand);
-//        assertThat(aggregateIdResult.isSuccess()).isTrue();
-//
-//        var aggregateId = (UUID) aggregateIdResult.getOrNull();
-//        assertThat(aggregateId).isNotNull().isEqualTo(updateCommand.getId());
-//    }
-//
-//    @Test
-//    void findAggregateIdOnCommandForClassMethodWithAnnotation() {
-//        var updateCommand = new PublishAdCommand(UUID.randomUUID());
-//        Result<?> aggregateIdResult = commandGateway.findAggregateId(updateCommand);
-//
-//        var aggregateId = (UUID) aggregateIdResult.getOrNull();
-//        assertThat(aggregateId).isNotNull().isEqualTo(updateCommand.getId());
-//    }
-
-    @Test
-    void findAggregateClasses() {
-        List<Class<?>> subClasses = ClassIndexLoader.getSubClasses(Aggregate.class);
-        assertThat(subClasses).hasSize(1);
-    }
-
     @Test
     void ableToFindCommandHandlerDetailsForConstructor() {
         Optional<CommandHandlerMetadata> commandHandler = CommandHandlerIndexLoader.findCommandHandler(CreateAdCommand.class);
@@ -87,7 +44,9 @@ class CommandGatewayTest {
             assertThat(commandHandlerDetail.commandType()).isNotNull().isEqualTo(CreateAdCommand.class);
             assertThat(commandHandlerDetail.methodName()).isEqualTo("<init>");
             assertThat(commandHandlerDetail.isConstructor()).isTrue();
-            assertThat(commandHandlerDetail.aggregateIdMetadata().isValid()).isFalse();
+            AggregateIdMetadata aggregateIdMetadata = commandHandlerDetail.aggregateIdMetadata();
+            assertThat(aggregateIdMetadata).isNotNull();
+            assertThat(aggregateIdMetadata.isValid()).isTrue();
         });
     }
 

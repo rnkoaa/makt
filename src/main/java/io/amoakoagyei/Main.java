@@ -4,6 +4,7 @@ import io.amoakoagyei.marketplace.CreateAdCommand;
 import io.amoakoagyei.marketplace.MarketPlaceAd;
 import io.amoakoagyei.marketplace.UpdateTitleCommand;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 public class Main {
@@ -25,7 +26,7 @@ public class Main {
         final AggregateStore aggregateStore = new AggregateStore();
         CommandGateway commandGateway = new CommandGateway(aggregateStore);
 
-        var result = commandGateway.handle(new CreateAdCommand("First Command"));
+        var result = commandGateway.handle(new CreateAdCommand(UUID.randomUUID(), "First Command"));
 
         switch (result) {
             case Failure(Exception ex) -> System.out.println(ex.getMessage());

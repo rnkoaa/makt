@@ -3,6 +3,7 @@ package io.amoakoagyei;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @IndexSubClasses
 public abstract class Aggregate {
     private final List<Object> events;

@@ -52,7 +52,7 @@ public class MarketPlaceAd extends Aggregate {
     @CommandHandler
     public MarketPlaceAd(CreateAdCommand command) {
         super();
-        this.apply(new AdCreatedEvent(UUID.randomUUID(), command.title()));
+        this.apply(new AdCreatedEvent(command.id(), command.title()));
     }
 
     @EventSourcingHandler

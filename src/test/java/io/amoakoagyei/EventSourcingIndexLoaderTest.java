@@ -6,7 +6,6 @@ import io.amoakoagyei.runtime.EventSourcingIndexLoader;
 import io.amoakoagyei.runtime.EventSourcingMetadata;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

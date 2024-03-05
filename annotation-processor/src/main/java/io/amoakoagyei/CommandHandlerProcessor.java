@@ -5,9 +5,11 @@ import com.google.auto.service.AutoService;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.*;
-import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @AutoService(Processor.class)
@@ -39,7 +41,7 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
         if (!intersection.isEmpty()) {
             intersection.forEach(cmd ->
                     error(("Class %s is used as a CommandHandler Parameter but does not have a " +
-                            "TargetAggregateIdenfier annotated field, method or record component").formatted(cmd))
+                            "TargetAggregateIdentifier annotated field, method or record component").formatted(cmd))
             );
 
             return false;
@@ -106,7 +108,7 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
         if (enclosingElement.getKind() == ElementKind.RECORD && t.getKind() == ElementKind.RECORD_COMPONENT) {
             return transformRecordComponentElement(t, enclosingElement);
         } else if (enclosingElement.getKind() != ElementKind.RECORD) {
-            // for constructor Records, fields are implicitly available so we need to ignore those
+            // for constructor Records, fields are implicitly available, so we need to ignore those
             var builder = new AggregateIdDetails.AggregateIdDetailsBuilder()
                     .accessorKind(t.getKind())
                     .modifiers(t.getModifiers())
@@ -155,13 +157,12 @@ public class CommandHandlerProcessor extends AbstractAnnotationProcessor {
                 .map(it -> it.getQualifiedName().toString())
                 .collect(Collectors.toSet());
 
-        var nonConstructorHandlers = commandHandlers.stream()
-                .filter(it -> it.getKind() != ElementKind.CONSTRUCTOR)
+        var commandHandlerNames = commandHandlers.stream()
                 .map(it -> TypeElements.getParamType(typeUtils, it))
                 .filter(Objects::nonNull)
                 .map(it -> it.getQualifiedName().toString())
                 .collect(Collectors.toSet());
-        return disjunction(nonConstructorHandlers, targetAggregateIdEnclosingElement);
+        return disjunction(commandHandlerNames, targetAggregateIdEnclosingElement);
     }
 
     private CommandHandlerProperties transform(ExecutableElement it) {

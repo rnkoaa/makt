@@ -43,15 +43,6 @@ public class AggregateIdLoaderTest {
     }
 
     @Test
-    void unableToLoadCommandWithoutId() {
-        var updateTitleCommand = new CreateAdCommand("update title");
-        var aggregateIdOptions = AggregateIdLoader.extractAggregateId(updateTitleCommand);
-        assertThat(aggregateIdOptions.isFailure()).isTrue();
-        Exception exception = aggregateIdOptions.exceptionOrNull();
-        assertThat(exception).isNotNull().isInstanceOf(RuntimeException.class);
-    }
-
-    @Test
     void loadIdFromValidCommand() {
         var updateTitleCommand = new UpdateTitleCommand(UUID.randomUUID(), "update title");
         var aggregateIdOptions = AggregateIdLoader.extractAggregateId(updateTitleCommand);
