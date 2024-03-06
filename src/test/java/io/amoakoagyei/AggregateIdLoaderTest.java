@@ -80,4 +80,18 @@ public class AggregateIdLoaderTest {
                     .isEqualTo(adCompletedEvent.getAggregateId());
         });
     }
+
+    @Test
+    void loadIdFromValidEventClassGetterMethod() {
+        var imageAddedEvent = new ImageAddedEvent(UUID.randomUUID());
+        var aggregateIdOptions = AggregateIdLoader.extractAggregateId(imageAddedEvent);
+        assertThat(aggregateIdOptions.isSuccess()).isTrue();
+        assertThat(aggregateIdOptions).satisfies(s -> {
+            AggregateIdLoader.AggregateIdOptions idOptions = s.getOrNull();
+            assertThat(idOptions.id())
+                    .isNotNull()
+                    .isInstanceOf(UUID.class)
+                    .isEqualTo(imageAddedEvent.getAggregateId());
+        });
+    }
 }

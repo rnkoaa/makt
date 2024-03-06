@@ -1,5 +1,6 @@
 package io.amoakoagyei.infra;
 
+import io.amoakoagyei.AggregateIdLoader;
 import io.amoakoagyei.Result;
 import io.amoakoagyei.runtime.CommandHandlerIndexLoader;
 import io.amoakoagyei.runtime.CommandHandlerMetadata;
@@ -14,7 +15,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AggregateLifeCycle {
     private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
     private static final Map<Object, List<AggregateEvent>> aggregateEvents = new ConcurrentHashMap<>();
-    private static final AggregateEventStore aggregateEventStore = new AggregateEventStore();
+    private static final AggregateEventStore aggregateEventStore = AggregateEventStore.getInstance();
+
+    public static void apply(Object event) {
+        if (event == null) {
+            throw new IllegalArgumentException("Event cannot be null");
+        }
+
+        var aggregateOptions = AggregateIdLoader.extractAggregateId(event);
+        aggregateOptions.map(aggregateIdOptions -> {
+            var aggregateType = aggregateIdOptions.aggregateType();
+            var aggregateId = aggregateIdOptions.id();
+            aggregateEventStore.store(new AggregateEvent(aggregateId, event, aggregateType));
+            return aggregateId;
+        });
+    }
 
     public static Result<Object> applyEvent(Object aggregate, Object event) {
         if (aggregate == null) {

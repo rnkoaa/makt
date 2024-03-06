@@ -4,6 +4,7 @@ import io.amoakoagyei.Aggregate;
 import io.amoakoagyei.AggregateIdentifier;
 import io.amoakoagyei.CommandHandler;
 import io.amoakoagyei.EventSourcingHandler;
+import io.amoakoagyei.infra.AggregateLifeCycle;
 
 import java.util.UUID;
 
@@ -53,13 +54,18 @@ public class MarketPlaceAd extends Aggregate {
     @CommandHandler
     public MarketPlaceAd(CreateAdCommand command) {
         super();
-        this.apply(new AdCreatedEvent(command.id(), command.title()));
+        AggregateLifeCycle.apply(new AdCreatedEvent(command.id(), command.title()));
     }
 
     @EventSourcingHandler
     public MarketPlaceAd on(AdCompletedEvent event) {
-       this.completed = true;
-       return this;
+        this.completed = true;
+        return this;
+    }
+
+    @EventSourcingHandler
+    public MarketPlaceAd on(ImageAddedEvent event) {
+        return this;
     }
 
     @EventSourcingHandler
@@ -91,22 +97,22 @@ public class MarketPlaceAd extends Aggregate {
 
     @CommandHandler
     public void handle(PublishAdCommand publishAdCommand) {
-        this.apply(new AdPublishedEvent(publishAdCommand.getId()));
+        AggregateLifeCycle.apply(new AdPublishedEvent(publishAdCommand.getId()));
     }
 
     @CommandHandler
     public void handle(DisableAdCommand publishAdCommand) {
-        this.apply(new AdDisabledEvent(publishAdCommand.id()));
+        AggregateLifeCycle.apply(new AdDisabledEvent(publishAdCommand.id()));
     }
 
     @CommandHandler
     public void handle(ApproveAdCommand approveAdCommand) {
-        this.apply(new AdApprovedEvent(approveAdCommand.getId(), approveAdCommand.getApprover()));
+        AggregateLifeCycle.apply(new AdApprovedEvent(approveAdCommand.getId(), approveAdCommand.getApprover()));
     }
 
     @CommandHandler
     public void handle(UpdateTitleCommand updateTitleCommand) {
-        this.apply(new TitleUpdatedEvent(
+        AggregateLifeCycle.apply(new TitleUpdatedEvent(
                 updateTitleCommand.aggregateId(),
                 updateTitleCommand.title()
         ));

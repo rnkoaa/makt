@@ -1,5 +1,6 @@
 package io.amoakoagyei;
 
+import io.amoakoagyei.infra.AggregateEventStore;
 import io.amoakoagyei.marketplace.CreateAdCommand;
 import io.amoakoagyei.marketplace.MarketPlaceAd;
 import io.amoakoagyei.marketplace.UpdateTitleCommand;
@@ -14,12 +15,12 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 class CommandGatewayTest {
 
-    private final AggregateStore aggregateStore = new AggregateStore();
-    private final CommandGateway commandGateway = new CommandGateway(aggregateStore);
+    private final CommandGateway commandGateway = new CommandGateway();
+    private final AggregateEventStore aggregateEventStore = AggregateEventStore.getInstance();
 
     @AfterEach
     void tearDown() {
-        aggregateStore.clear();
+        aggregateEventStore.clear();
     }
 
     @Test
@@ -31,7 +32,8 @@ class CommandGatewayTest {
             assertThat(s).isNotNull();
             assertThat(s.getClass()).isEqualTo(MarketPlaceAd.class);
             var marketPlace = (MarketPlaceAd) s;
-            assertThat(marketPlace.getEvents()).isNotEmpty().hasSize(1);
+            assertThat(aggregateEventStore.count()).isEqualTo(1);
+//            assertThat(marketPlace.getEvents()).isNotEmpty().hasSize(1);
         });
     }
 

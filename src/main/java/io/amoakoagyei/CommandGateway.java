@@ -8,11 +8,6 @@ import java.lang.invoke.MethodType;
 
 public class CommandGateway {
     MethodHandles.Lookup lookup = MethodHandles.lookup();
-    private final AggregateStore aggregateStore;
-
-    public CommandGateway(AggregateStore aggregateStore) {
-        this.aggregateStore = aggregateStore;
-    }
 
     public Result<Object> handle(Command command) {
         if (command == null) {
@@ -29,13 +24,15 @@ public class CommandGateway {
     }
 
     private Result<Object> handleNonConstructorAggregate(CommandHandlerMetadata commandHandlerMetadata, Command command) {
-        return AggregateIdLoader.extractAggregateId(commandHandlerMetadata, command)
-                .flatMap(aggregateStore::load
-                )
-                .map(aggregate -> {
-                    return applyCommandOnAggregate(commandHandlerMetadata, aggregate, command);
-                })
-                ;
+//        return AggregateIdLoader.extractAggregateId(commandHandlerMetadata, command)
+//                .flatMap(aggregateStore::load
+//                )
+//                .map(aggregate -> {
+//                    return applyCommandOnAggregate(commandHandlerMetadata, aggregate, command);
+//                })
+//                ;
+//        AggregateLifeCycle.loadAggregate()
+        return Result.failure(new RuntimeException("Aggregate does not exist"));
     }
 
     private Result<Object> applyCommandOnAggregate(CommandHandlerMetadata handlerDetails,

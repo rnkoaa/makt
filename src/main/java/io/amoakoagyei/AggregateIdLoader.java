@@ -21,7 +21,7 @@ public class AggregateIdLoader {
                 .flatMap(it -> extractAggregateId(it, command)
                         .map(id -> {
                             var aggregateIdClass = it.aggregateIdMetadata().aggregateIdClass();
-                            return new AggregateIdOptions(id, aggregateIdClass);
+                            return new AggregateIdOptions(id, aggregateIdClass, it.aggregateType());
                         }));
     }
 
@@ -71,7 +71,7 @@ public class AggregateIdLoader {
         }
     }
 
-    public record AggregateIdOptions(Object id, Class<?> aggregateType) {
+    public record AggregateIdOptions(Object id, Class<?> idClass, Class<?> aggregateType) {
     }
 }
 

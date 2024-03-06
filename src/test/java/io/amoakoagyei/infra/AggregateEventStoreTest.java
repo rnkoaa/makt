@@ -2,6 +2,7 @@ package io.amoakoagyei.infra;
 
 import io.amoakoagyei.marketplace.AdApprovedEvent;
 import io.amoakoagyei.marketplace.AdCreatedEvent;
+import io.amoakoagyei.marketplace.MarketPlaceAd;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -13,24 +14,24 @@ class AggregateEventStoreTest {
 
     @Test
     void storeAggregateEvents() {
-        var aggregateEventStore = new AggregateEventStore();
+        var aggregateEventStore = AggregateEventStore.getInstance();
         var aggregateId = UUID.randomUUID();
         var adCreatedEvent = new AdCreatedEvent(aggregateId, "title 1");
-        aggregateEventStore.store(new AggregateEvent(aggregateId, adCreatedEvent, 0));
+        aggregateEventStore.store(new AggregateEvent(aggregateId, adCreatedEvent, MarketPlaceAd.class, 0));
         assertThat(aggregateEventStore.count()).isEqualTo(1);
         aggregateEventStore.clear();
     }
 
     @Test
     void storeMultipleAggregateEvents() {
-        var aggregateEventStore = new AggregateEventStore();
+        var aggregateEventStore = AggregateEventStore.getInstance();
         var aggregateId = UUID.randomUUID();
         var adCreatedEvent = new AdCreatedEvent(aggregateId, "title 1");
-        aggregateEventStore.store(new AggregateEvent(aggregateId, adCreatedEvent, 0));
+        aggregateEventStore.store(new AggregateEvent(aggregateId, adCreatedEvent, MarketPlaceAd.class, 0));
         assertThat(aggregateEventStore.count()).isEqualTo(1);
 
         var adApprovedEvent = new AdApprovedEvent(aggregateId, "Richard");
-        aggregateEventStore.store(new AggregateEvent(aggregateId, adApprovedEvent, 1));
+        aggregateEventStore.store(new AggregateEvent(aggregateId, adApprovedEvent, MarketPlaceAd.class, 1));
         assertThat(aggregateEventStore.count()).isEqualTo(1);
 
         List<AggregateEvent> aggregateEvents = aggregateEventStore.find(aggregateId);

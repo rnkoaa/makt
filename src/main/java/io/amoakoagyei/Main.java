@@ -23,8 +23,8 @@ public class Main {
             ad.handle((UpdateTitleCommand) updateTitleCommand);
             return Result.success(ad);
         });
-        final AggregateStore aggregateStore = new AggregateStore();
-        CommandGateway commandGateway = new CommandGateway(aggregateStore);
+//        final AggregateStore aggregateStore = new AggregateStore();
+        CommandGateway commandGateway = new CommandGateway();
 
         var result = commandGateway.handle(new CreateAdCommand(UUID.randomUUID(), "First Command"));
 
@@ -32,7 +32,8 @@ public class Main {
             case Failure(Exception ex) -> System.out.println(ex.getMessage());
             case Success(MarketPlaceAd marketPlaceAd) -> {
                 System.out.println(marketPlaceAd);
-                marketPlaceAd.getEvents().forEach(System.out::println);
+
+//                marketPlaceAd.getEvents().forEach(System.out::println);
             }
             default -> System.out.println("unknown");
         }
