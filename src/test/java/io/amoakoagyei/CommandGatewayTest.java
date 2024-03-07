@@ -15,8 +15,8 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 class CommandGatewayTest {
 
-    private final CommandGateway commandGateway = new CommandGateway();
     private final AggregateEventStore aggregateEventStore = AggregateEventStore.getInstance();
+    private final CommandGateway commandGateway = new CommandGateway(aggregateEventStore);
 
     @AfterEach
     void tearDown() {
@@ -26,14 +26,12 @@ class CommandGatewayTest {
     @Test
     void constructorCanBeInvokedForCommand() {
         var createCommand = new CreateAdCommand(UUID.randomUUID(), "created a new ad");
-        var result = commandGateway.handle(createCommand);
+        var result = commandGateway.send(createCommand);
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getOrNull()).isNotNull().satisfies(s -> {
             assertThat(s).isNotNull();
             assertThat(s.getClass()).isEqualTo(MarketPlaceAd.class);
-            var marketPlace = (MarketPlaceAd) s;
             assertThat(aggregateEventStore.count()).isEqualTo(1);
-//            assertThat(marketPlace.getEvents()).isNotEmpty().hasSize(1);
         });
     }
 

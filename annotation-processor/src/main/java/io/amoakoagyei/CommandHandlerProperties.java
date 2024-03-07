@@ -10,11 +10,12 @@ public record CommandHandlerProperties(
         String aggregateType,
         String methodName,
         String methodReturnType,
+        Set<Modifier> methodModifiers,
         ElementKind commandElementType,
         String aggregateElementType,
         String aggregateIdAccessorName,
         ElementKind aggregateIdAccessorKind,
-        Set<Modifier> modifiers
+        Set<Modifier> aggregateIdModifiers
 ) {
     static CommandHandlerPropertiesBuilder builder() {
         return new CommandHandlerPropertiesBuilder();
@@ -22,14 +23,19 @@ public record CommandHandlerProperties(
 
     @Override
     public String toString() {
-        String mfs = modifiers == null ? "NULL" : modifiers
+        String mfs = aggregateIdModifiers == null ? "NULL" : aggregateIdModifiers
                 .stream()
                 .map(Enum::name)
                 .collect(Collectors.joining(";"));
-        return "%s,%s,%s,%s,%s,%s,%s,%s,%s".formatted(
+        String methodModifiersString = methodModifiers == null ? "NULL" : methodModifiers
+                .stream()
+                .map(Enum::name)
+                .collect(Collectors.joining(";"));
+        return "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s".formatted(
                 aggregateAttributeType,
                 aggregateType,
                 methodName,
+                methodModifiersString,
                 methodReturnType == null ? "void.class" : methodReturnType,
                 commandElementType == null ? "NULL" : commandElementType.name(),
                 aggregateElementType == null ? "NULL" : aggregateElementType,
@@ -43,6 +49,7 @@ public record CommandHandlerProperties(
         return new CommandHandlerPropertiesBuilder()
                 .aggregateAttributeType(aggregateAttributeType)
                 .aggregateType(aggregateType)
+                .methodReturnType(methodReturnType)
                 .handlerName(methodName);
     }
 
@@ -55,10 +62,15 @@ public record CommandHandlerProperties(
         private String aggregateIdAccessorName;
         private String aggregateIdType;
         private Set<Modifier> aggregateIdModifiers;
+        private Set<Modifier> methodModifiers;
         private ElementKind aggregateIdAccessorKind;
 
         public CommandHandlerPropertiesBuilder aggregateAttributeType(String aggregateAttributeType) {
             this.aggregateAttributeType = aggregateAttributeType;
+            return this;
+        }
+ public CommandHandlerPropertiesBuilder methodModifiers(Set<Modifier> methodModifiers) {
+            this.methodModifiers = methodModifiers;
             return this;
         }
 
@@ -107,6 +119,7 @@ public record CommandHandlerProperties(
                     aggregateType,
                     handlerName,
                     methodReturnType,
+                    methodModifiers,
                     commandElementType,
                     aggregateIdType,
                     aggregateIdAccessorName,

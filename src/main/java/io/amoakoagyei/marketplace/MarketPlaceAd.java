@@ -8,6 +8,8 @@ import io.amoakoagyei.infra.AggregateLifeCycle;
 
 import java.util.UUID;
 
+import static io.amoakoagyei.infra.AggregateLifeCycle.apply;
+
 /*
 
 Name	Last commit message	Last commit date
@@ -54,7 +56,7 @@ public class MarketPlaceAd extends Aggregate {
     @CommandHandler
     public MarketPlaceAd(CreateAdCommand command) {
         super();
-        AggregateLifeCycle.apply(new AdCreatedEvent(command.id(), command.title()));
+        apply(new AdCreatedEvent(command.id(), command.title()));
     }
 
     @EventSourcingHandler
@@ -97,22 +99,22 @@ public class MarketPlaceAd extends Aggregate {
 
     @CommandHandler
     public void handle(PublishAdCommand publishAdCommand) {
-        AggregateLifeCycle.apply(new AdPublishedEvent(publishAdCommand.getId()));
+        apply(new AdPublishedEvent(publishAdCommand.getId()));
     }
 
     @CommandHandler
     public void handle(DisableAdCommand publishAdCommand) {
-        AggregateLifeCycle.apply(new AdDisabledEvent(publishAdCommand.id()));
+        apply(new AdDisabledEvent(publishAdCommand.id()));
     }
 
     @CommandHandler
     public void handle(ApproveAdCommand approveAdCommand) {
-        AggregateLifeCycle.apply(new AdApprovedEvent(approveAdCommand.getId(), approveAdCommand.getApprover()));
+        apply(new AdApprovedEvent(approveAdCommand.getId(), approveAdCommand.getApprover()));
     }
 
     @CommandHandler
     public void handle(UpdateTitleCommand updateTitleCommand) {
-        AggregateLifeCycle.apply(new TitleUpdatedEvent(
+        apply(new TitleUpdatedEvent(
                 updateTitleCommand.aggregateId(),
                 updateTitleCommand.title()
         ));

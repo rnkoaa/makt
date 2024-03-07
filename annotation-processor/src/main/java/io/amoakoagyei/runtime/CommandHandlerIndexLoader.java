@@ -24,6 +24,8 @@ public class CommandHandlerIndexLoader {
                     var aggregateIdType = ClassIndexLoader.loadClass(idMetadataInfo.aggregateIdElementType());
                     var aggregateKind = getKind(idMetadataInfo.aggregateIdElementKind());
 
+                    Set<ElementModifier> methodModifiers = transform(handler.modifiers());
+
                     Set<ElementModifier> modifiers = transform(idMetadataInfo.modifiers());
                     var aggregateIdMetadata = new AggregateIdMetadata(
                             commandType,
@@ -39,6 +41,7 @@ public class CommandHandlerIndexLoader {
                                     commandType,
                                     aggregateType,
                                     handler.handlerMethodName(),
+                                    methodModifiers,
                                     methodReturnType,
                                     aggregateIdMetadata
                             )
